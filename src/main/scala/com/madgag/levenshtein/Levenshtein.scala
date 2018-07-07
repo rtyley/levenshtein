@@ -33,4 +33,23 @@ object Levenshtein {
     }
     score(X.length)
   }
+
+
+  def Hirschberg(X: String,Y: String)(implicit cost: Cost): (String,String) = (X.length,Y.length) match {
+    case (0,_) => ("-" * Y.length, Y)
+    case (_,0) => (X, "-" * X.length)
+    case (1,_) | (_,1) => ??? // NeedlemanWunsch(X,Y)
+    case _ =>
+      val (xL,xR) = X.splitAt(X.length / 2)
+
+      val scoreL = nwScoreLastLine(xL, Y)
+      val scoreR = nwScoreLastLine(xR.reverse, Y.reverse).reverse
+
+      val optimalYsplitIndex = (0 until Y.length).maxBy(i => scoreL(i) + scoreR(i))
+
+      val (yL,yR) = Y.splitAt(optimalYsplitIndex)
+
+      val ((zL,wL), (zR,wR)) = (Hirschberg(xL, yL), Hirschberg(xR, yR))
+      (zL+zR, wL+wR)
+  }
 }
