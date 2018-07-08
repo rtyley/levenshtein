@@ -65,10 +65,11 @@ object NeedlemanWunsch {
       } yield edit
     }
 
+    def align: Seq[Edit] = bestAlignments.head
+
     def bestAlignments: Stream[Seq[Edit]] = {
 
       def chase(c: Coord): Stream[Seq[Edit]] = {
-        // println(s"Chasing $c")
         val bestEdits = bestEditsAt(c)
         if (bestEdits.isEmpty) Stream(Seq.empty) else bestEdits.toStream.flatMap(edit => chase(c on edit.typ).map(_ :+ edit))
       }

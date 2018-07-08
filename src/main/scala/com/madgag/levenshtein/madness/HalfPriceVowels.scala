@@ -15,11 +15,11 @@ object HalfPriceVowels {
     (a,b) => if (a==b) 0 else scoreChar(isVowel(a) || isVowel(b))
   )
 
-  def styleCost(cost: Int): String = cost match {
+  def styleCost(cost: Int): String = -cost match {
     case 0 => ""
-    case -1 => "½"
-    case -2 => "1"
-    case _ => f"${cost / -2.0f}%.1f"
+    case 1 => "½"
+    case 2 => "1"
+    case _ => f"${cost / 2.0f}%.1f"
   }
 
   def score(X: String, Y: String): Double = {
