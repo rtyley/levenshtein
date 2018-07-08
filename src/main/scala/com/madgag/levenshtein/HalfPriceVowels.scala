@@ -11,5 +11,17 @@ object HalfPriceVowels {
     (a,b) => if (a==b) 0 else scoreChar(isVowel(a) || isVowel(b))
   )
 
-  def score(X: String, Y: String): Double = Levenshtein.nwScoreLastLine(X, Y).last * -0.5
+  def score(X: String, Y: String): Double = {
+
+    val grid = NeedlemanWunsch.Grid(X, Y)
+
+    val s = grid.scoreLastLine().last * -0.5
+
+    for (alignment <- grid.bestAlignments.take(3)) {
+      println()
+      Edit.printWithCosts(alignment)
+    }
+
+    s
+  }
 }
