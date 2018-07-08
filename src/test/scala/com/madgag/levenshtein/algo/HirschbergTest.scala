@@ -15,6 +15,6 @@ class HirschbergTest extends FlatSpec with Matchers {
 
   it should "match the result given in the Wikipedia article" in {
     // Examples taken from https://en.wikipedia.org/wiki/Hirschberg%27s_algorithm#Example
-    Edit.asStringTuple(Hirschberg.align("AGTACGCA","TATGC")) should equal(("AGTACGCA", "--TATGC-"))
+    Hirschberg.align("AGTACGCA","TATGC").asStringTuple should equal(("AGTACGCA", "--TATGC-"))
   }
 }

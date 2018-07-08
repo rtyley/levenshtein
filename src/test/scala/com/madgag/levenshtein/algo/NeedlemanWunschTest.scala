@@ -11,6 +11,6 @@ class NeedlemanWunschTest extends FlatSpec with Matchers {
     // Examples taken from https://en.wikipedia.org/wiki/Hirschberg%27s_algorithm#Example
     val grid = NeedlemanWunsch.Grid("AGTACGCA", "TATGC")
     grid.scoreLastLine()
-    grid.bestAlignments.map(Edit.asTwoStrings) should contain(Seq("AGTACGCA", "--TATGC-"))
+    grid.bestAlignments.map(_.asTwoStrings) should contain(Seq("AGTACGCA", "--TATGC-"))
   }
 }

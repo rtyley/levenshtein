@@ -30,6 +30,35 @@ case class Substitute(a: Char, b: Char) extends Edit {
 
 object Edit {
 
+  implicit class RichSeqEdits(edits: Seq[Edit]) {
+    def cost(implicit cost: Cost): Int = edits.map(cost.cost).sum
+
+    def asStringTuple: (String, String) =
+      (edits.map(_.srcOpt.getOrElse('-')).mkString,edits.map(_.dstOpt.getOrElse('-')).mkString)
+
+    def asTwoStrings: Seq[String] =
+      Seq(edits.map(_.srcOpt.getOrElse('-')).mkString,edits.map(_.dstOpt.getOrElse('-')).mkString)
+
+
+    def diagram(costStyler: Int => String)(implicit cost: Cost): Unit = {
+      val costs = edits.map(cost.cost)
+      val styledCosts = costs.map(costStyler)
+      val requiredColWidth = styledCosts.map(_.length).max
+
+      def pad(s: Seq[String]): String = s.map(_.padTo(requiredColWidth,' ')).mkString
+
+      println(pad(edits.map(_.srcOpt.getOrElse('-').toString)))
+      val operationIndicators = edits.map { case s: Substitute if s.isAltering => "↓" case _ => "" }
+      if (operationIndicators.exists(_.nonEmpty)) {
+        println(pad(operationIndicators ))
+      }
+      println(pad(edits.map(_.dstOpt.getOrElse('-').toString)))
+
+
+      println(s"${pad(styledCosts)} => Total cost: ${costStyler(costs.sum)}")
+    }
+  }
+
   sealed trait Typ
 
   object Typ {
@@ -41,21 +70,4 @@ object Edit {
   def insert(s: String): Seq[Edit] = s.map(Insert)
   def delete(s: String): Seq[Edit] = s.map(Delete)
 
-  def asStringTuple(edits: Seq[Edit]): (String, String) =
-    (edits.map(_.srcOpt.getOrElse('-')).mkString,edits.map(_.dstOpt.getOrElse('-')).mkString)
-
-
-  def asTwoStrings(edits: Seq[Edit]): Seq[String] =
-    Seq(edits.map(_.srcOpt.getOrElse('-')).mkString,edits.map(_.dstOpt.getOrElse('-')).mkString)
-
-  def printWithCosts(edits: Seq[Edit])(implicit cost: Cost): Unit = {
-    val width = 3
-    def pad(s: Seq[String]): String = s.map(_.padTo(width,' ')).mkString
-
-    println(pad(edits.map(_.srcOpt.getOrElse('-').toString)))
-    println(pad(edits.map(_.dstOpt.getOrElse('-').toString)))
-    val costs = edits.map(cost.cost)
-    val costsAndTotal = costs :+ costs.sum
-    println(pad(costsAndTotal.map(_.toString)))
-  }
 }
