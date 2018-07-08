@@ -43,7 +43,8 @@ object Edit {
     def diagram(costStyler: Int => String)(implicit cost: Cost): Unit = {
       val costs = edits.map(cost.cost)
       val styledCosts = costs.map(costStyler)
-      val requiredColWidth = styledCosts.map(_.length).max
+
+      val requiredColWidth = if (edits.isEmpty) 1 else styledCosts.map(_.length).max
 
       def pad(s: Seq[String]): String = s.map(_.padTo(requiredColWidth,' ')).mkString
 

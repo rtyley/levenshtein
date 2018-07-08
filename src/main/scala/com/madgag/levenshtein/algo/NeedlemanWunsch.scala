@@ -68,6 +68,7 @@ object NeedlemanWunsch {
     def align: Seq[Edit] = bestAlignments.head
 
     def bestAlignments: Stream[Seq[Edit]] = {
+      scoreLastLine()
 
       def chase(c: Coord): Stream[Seq[Edit]] = {
         val bestEdits = bestEditsAt(c)

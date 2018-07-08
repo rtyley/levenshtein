@@ -19,7 +19,7 @@ object HalfPriceVowels {
     case 0 => ""
     case 1 => "½"
     case 2 => "1"
-    case _ => f"${cost / 2.0f}%.1f"
+    case c => f"${c / 2.0f}%.1f"
   }
 
   def score(X: String, Y: String): Double = {

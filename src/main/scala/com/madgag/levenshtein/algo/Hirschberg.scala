@@ -7,10 +7,7 @@ object Hirschberg {
   def align(X: String,Y: String)(implicit cost: Cost): Seq[Edit] = (X.length,Y.length) match {
     case (0,_) => insert(Y)
     case (_,0) => delete(X)
-    case (1,_) | (_,1) =>
-      val grid = NeedlemanWunsch.Grid(X,Y)
-      grid.scoreLastLine()
-      grid.bestAlignments.head
+    case (1,_) | (_,1) => NeedlemanWunsch.Grid(X,Y).align
     case _ =>
       val (xL,xR) = X.splitAt(X.length / 2)
 
