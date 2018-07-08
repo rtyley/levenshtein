@@ -1,4 +1,7 @@
-package com.madgag.levenshtein
+package com.madgag.levenshtein.madness
+
+import com.madgag.levenshtein.algo.NeedlemanWunsch
+import com.madgag.levenshtein.{Cost, Edit}
 
 object HalfPriceVowels {
   val isVowel: Set[Char] = "aeiouAEIOU".toSet

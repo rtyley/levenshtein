@@ -1,4 +1,4 @@
-package com.madgag.levenshtein
+package com.madgag.levenshtein.madness
 
 import org.scalactic.TolerantNumerics
 import org.scalatest.FlatSpec
@@ -17,6 +17,6 @@ class HalfPriceVowelsTest extends FlatSpec {
     assert(HalfPriceVowels.score(
       "Pneumonoultramicroscopicsilicovolcanoconiosis",
       "Pseudopseudohypoparathyroidism"
-    ) === 26.0)
+    ) === 26.0) // Not 26.5 or 33, so far as I can see...
   }
 }
