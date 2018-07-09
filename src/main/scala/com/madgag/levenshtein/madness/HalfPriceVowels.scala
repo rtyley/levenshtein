@@ -23,7 +23,11 @@ object HalfPriceVowels {
     case s: Substitute[Char]  => if (s.isAltering) scoreChar(isVowel(s.a) || isVowel(s.b)) else 0
   }
 
-  def score(X: String, Y: String): Double = Hirschberg.align(X, Y).cost * -0.5
+  def score(X: String, Y: String): Double = {
+    val alignment = Hirschberg.align(X, Y)
+    alignment.diagram(styleCost)
+    alignment.cost * -0.5
+  }
 
 
 }

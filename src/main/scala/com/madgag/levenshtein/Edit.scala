@@ -62,7 +62,7 @@ object Edit {
       println(pad(edits.map(_.dstOpt.getOrElse('-').toString)))
 
 
-      println(s"${pad(styledCosts)} => Total cost: ${costStyler(costs.sum)}")
+      println(s"${pad(styledCosts)} => Total cost: ${costStyler(costs.sum)}\n")
     }
   }
 
