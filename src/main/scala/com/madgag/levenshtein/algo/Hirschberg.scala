@@ -14,7 +14,7 @@ object Hirschberg {
       val scoreL = NeedlemanWunsch.Grid(xL, Y).scoreLastLine()
       val scoreR = NeedlemanWunsch.Grid(xR.reverse, Y.reverse).scoreLastLine().reverse
 
-      val optimalYsplitIndex = Y.indices.maxBy(i => scoreL(i) + scoreR(i))
+      val optimalYsplitIndex = (0 to Y.length).maxBy(i => scoreL(i) + scoreR(i))
 
       val (yL,yR) = Y.splitAt(optimalYsplitIndex)
 
