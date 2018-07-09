@@ -27,7 +27,7 @@ object NeedlemanWunsch {
     }
   }
 
-  case class Grid(X: String, Y: String)(implicit cost: Cost) {
+  case class Grid[T](X: Seq[T], Y: Seq[T])(implicit cost: Cost[T]) {
 
     private val coordOfOptimalResult = Coord(X.length,Y.length)
 
@@ -35,12 +35,12 @@ object NeedlemanWunsch {
 
     def previouslyCalculatedScore(c: Coord): Int = d(c.x)(c.y)
 
-    def X_(c: Coord):Char = X(c.x)
-    def Y_(c: Coord):Char = Y(c.y)
+    def X_(c: Coord):T = X(c.x)
+    def Y_(c: Coord):T = Y(c.y)
 
-    def editsAt(c: Coord): Set[Edit] = c.availableEdits.map(editAt(c,_))
+    def editsAt(c: Coord): Set[Edit[T]] = c.availableEdits.map(editAt(c,_))
 
-    def editAt(c: Coord, typ: Typ): Edit = {
+    def editAt(c: Coord, typ: Typ): Edit[T] = {
       val prior = c on typ
       typ match {
         case Ins => Insert(Y_(prior))
@@ -49,7 +49,7 @@ object NeedlemanWunsch {
       }
     }
 
-    def scoreFromPreviouslyCalculatedScores(c: Coord, edit: Edit): Int =
+    def scoreFromPreviouslyCalculatedScores(c: Coord, edit: Edit[T]): Int =
       previouslyCalculatedScore(c on edit.typ) + cost.cost(edit)
 
     def calculateScore(c: Coord): Int = {
@@ -57,7 +57,7 @@ object NeedlemanWunsch {
       if (availableEdits.isEmpty) 0 else availableEdits.map(scoreFromPreviouslyCalculatedScores(c, _)).max
     }
 
-    def bestEditsAt(c: Coord): Set[Edit] = {
+    def bestEditsAt(c: Coord): Set[Edit[T]] = {
       val bestScore = previouslyCalculatedScore(c)
       for {
         edit <- editsAt(c)
@@ -65,12 +65,12 @@ object NeedlemanWunsch {
       } yield edit
     }
 
-    def align: Seq[Edit] = bestAlignments.head
+    def align: Seq[Edit[T]] = bestAlignments.head
 
-    def bestAlignments: Stream[Seq[Edit]] = {
+    def bestAlignments: Stream[Seq[Edit[T]]] = {
       scoreLastLine()
 
-      def chase(c: Coord): Stream[Seq[Edit]] = {
+      def chase(c: Coord): Stream[Seq[Edit[T]]] = {
         val bestEdits = bestEditsAt(c)
         if (bestEdits.isEmpty) Stream(Seq.empty) else bestEdits.toStream.flatMap(edit => chase(c on edit.typ).map(_ :+ edit))
       }

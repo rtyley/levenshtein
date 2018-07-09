@@ -1,13 +1,22 @@
 package com.madgag.levenshtein.algo
 
-import com.madgag.levenshtein.Cost
-import org.scalacheck.Gen
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{FlatSpec, Matchers}
+import com.madgag.levenshtein._
+import org.scalatest.{FlatSpec, Inspectors, Matchers}
 
-class HirschbergTest extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks {
+import scala.util.Random
 
-  implicit val costInWikipediaExample = Cost(_ => -2, _ => -2, (x, y) => if (x == y) 2 else -1)
+object HirschbergTest {
+
+  implicit val costInWikipediaExample: Cost[Char] = {
+    case Delete(_) | Insert(_) => -2
+    case s: Substitute[_] => if (s.isAltering) -1 else 2
+  }
+
+}
+
+class HirschbergTest extends FlatSpec with Matchers with Inspectors {
+
+  import HirschbergTest.costInWikipediaExample
 
   it should "get the behaviour it needs when delegating to Needleman-Wunsch" in {
     // Examples taken from https://en.wikipedia.org/wiki/Hirschberg%27s_algorithm#Example
@@ -20,22 +29,26 @@ class HirschbergTest extends FlatSpec with Matchers with GeneratorDrivenProperty
     Hirschberg.align("AGTACGCA","TATGC").asStringTuple should equal(("AGTACGCA", "--TATGC-"))
   }
 
-
   it should "be fine with aligning two empty strings" in {
     Hirschberg.align("", "") shouldBe empty
   }
 
   it should "stand up to lots of comparisions with Needleman-Wunsch" in {
-    implicit val generatorDrivenConfig = PropertyCheckConfig(minSize = 0, maxSize = 20)
+    def shortString= Random.alphanumeric.take(Random.nextInt(20)).mkString
 
-    forAll (Gen.alphaStr, Gen.alphaStr) { (a: String, b: String) =>
+    forAll (Stream.fill(1000)((shortString, shortString))) { case (a: String, b: String) =>
       val grid = NeedlemanWunsch.Grid(a, b)
+      val nwScore = grid.scoreLastLine().last
+      val hirschbergAlignment = Hirschberg.align(a, b)
 
-      val hirschbergEdits = Hirschberg.align(a, b)
+      if (hirschbergAlignment.cost != nwScore) {
+        println("\nNeedlemanWunsch")
+        grid.align.diagram(_.toString)
 
-      hirschbergEdits.diagram(_.toString)
-      hirschbergEdits.cost shouldBe grid.scoreLastLine().last
-      grid.bestAlignments should contain(hirschbergEdits)
+        println("\nHirschberg")
+        hirschbergAlignment.diagram(_.toString)
+      }
+      hirschbergAlignment.cost shouldBe nwScore
     }
   }
 }

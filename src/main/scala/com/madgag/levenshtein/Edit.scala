@@ -4,24 +4,24 @@ import com.madgag.levenshtein.Edit.Typ
 import com.madgag.levenshtein.Edit.Typ._
 
 
-sealed trait Edit {
+sealed trait Edit[T] {
   def typ: Typ
 
-  def srcOpt: Option[Char]
-  def dstOpt: Option[Char]
+  def srcOpt: Option[T]
+  def dstOpt: Option[T]
 }
 
-case class Delete(a: Char) extends Edit {
+case class Delete[T](a: T) extends Edit[T] {
   def typ = Del
   def srcOpt = Some(a)
   def dstOpt = None
 }
-case class Insert(b: Char) extends Edit {
+case class Insert[T](b: T) extends Edit[T] {
   def typ = Ins
   def srcOpt = None
   def dstOpt = Some(b)
 }
-case class Substitute(a: Char, b: Char) extends Edit {
+case class Substitute[T](a: T, b: T) extends Edit[T] {
   val typ = Sub
   val srcOpt = Some(a)
   val dstOpt = Some(b)
@@ -30,8 +30,8 @@ case class Substitute(a: Char, b: Char) extends Edit {
 
 object Edit {
 
-  implicit class RichSeqEdits(edits: Seq[Edit]) {
-    def cost(implicit cost: Cost): Int = edits.map(cost.cost).sum
+  implicit class RichSeqEdits[T](edits: Seq[Edit[T]]) {
+    def cost(implicit cost: Cost[T]): Int = edits.map(cost.cost).sum
 
     def asStringTuple: (String, String) =
       (edits.map(_.srcOpt.getOrElse('-')).mkString,edits.map(_.dstOpt.getOrElse('-')).mkString)
@@ -40,16 +40,19 @@ object Edit {
       Seq(edits.map(_.srcOpt.getOrElse('-')).mkString,edits.map(_.dstOpt.getOrElse('-')).mkString)
 
 
-    def diagram(costStyler: Int => String)(implicit cost: Cost): Unit = {
+    def diagram(costStyler: Int => String)(implicit cost: Cost[T]): Unit = {
       val costs = edits.map(cost.cost)
       val styledCosts = costs.map(costStyler)
 
-      val requiredColWidth = if (edits.isEmpty) 1 else styledCosts.map(_.length).max
+      val requiredColWidth = if (edits.isEmpty) 1 else {
+        val minRequired = styledCosts.map(_.length).max
+        if (minRequired == 1) 1 else minRequired+1
+      }
 
       def pad(s: Seq[String]): String = s.map(_.padTo(requiredColWidth,' ')).mkString
 
       println(pad(edits.map(_.srcOpt.getOrElse('-').toString)))
-      val operationIndicators = edits.map { case s: Substitute if s.isAltering => "↓" case _ => "" }
+      val operationIndicators = edits.map { case s: Substitute[_] if s.isAltering => "↓" case _ => "" }
       if (operationIndicators.exists(_.nonEmpty)) {
         println(pad(operationIndicators ))
       }
@@ -68,7 +71,7 @@ object Edit {
     object Sub extends Typ
   }
 
-  def insert(s: String): Seq[Edit] = s.map(Insert)
-  def delete(s: String): Seq[Edit] = s.map(Delete)
+  def insert[T](s: Seq[T]): Seq[Edit[T]] = s.map(Insert[T])
+  def delete[T](s: Seq[T]): Seq[Edit[T]] = s.map(Delete[T])
 
 }

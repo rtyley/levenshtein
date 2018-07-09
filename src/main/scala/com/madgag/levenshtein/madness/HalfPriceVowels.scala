@@ -1,19 +1,14 @@
 package com.madgag.levenshtein.madness
 
-import com.madgag.levenshtein.algo.{Hirschberg, NeedlemanWunsch}
-import com.madgag.levenshtein.{Cost, Edit}
-import Edit._
+import com.madgag.levenshtein.Edit._
+import com.madgag.levenshtein._
+import com.madgag.levenshtein.algo.Hirschberg
 
 object HalfPriceVowels {
   val isVowel: Set[Char] = "aeiouAEIOU".toSet
 
-  def scoreChar(isHalfPrice: Boolean): Int = if (isHalfPrice) -1 else -2
-
-  implicit val cost = Cost(
-    a => scoreChar(isVowel(a)),
-    a => scoreChar(isVowel(a)),
-    (a,b) => if (a==b) 0 else scoreChar(isVowel(a) || isVowel(b))
-  )
+  // because I'm so suspicious of floats, we use Ints for calculation, then convert back for display
+  private def scoreChar(isHalfPrice: Boolean): Int = if (isHalfPrice) -1 else -2
 
   def styleCost(cost: Int): String = -cost match {
     case 0 => ""
@@ -22,20 +17,13 @@ object HalfPriceVowels {
     case c => f"${c / 2.0f}%.1f"
   }
 
-  def score(X: String, Y: String): Double = {
-
-    val grid = NeedlemanWunsch.Grid(X, Y)
-
-    val s = grid.scoreLastLine().last * -0.5
-
-    for (alignment <- grid.bestAlignments.take(3)) {
-      println()
-      alignment.diagram(styleCost)
-    }
-
-    println("\nHirschberg:")
-    Hirschberg.align(X, Y).diagram(styleCost)
-
-    s
+  implicit val cost: Cost[Char] = (_: Edit[Char]) match {
+    case Delete(a) => scoreChar(isVowel(a))
+    case Insert(b) => scoreChar(isVowel(b))
+    case s: Substitute[Char]  => if (s.isAltering) scoreChar(isVowel(s.a) || isVowel(s.b)) else 0
   }
+
+  def score(X: String, Y: String): Double = Hirschberg.align(X, Y).cost * -0.5
+
+
 }
