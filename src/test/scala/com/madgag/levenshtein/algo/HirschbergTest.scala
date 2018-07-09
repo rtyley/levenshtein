@@ -33,22 +33,22 @@ class HirschbergTest extends FlatSpec with Matchers with Inspectors {
     Hirschberg.align("", "") shouldBe empty
   }
 
-  it should "stand up to lots of comparisions with Needleman-Wunsch" in {
-    def shortString= Random.alphanumeric.take(Random.nextInt(20)).mkString
+  it should "align this generated example that failed" in {
+    compareHirshWithNW("abcd", "zb")
+  }
 
-    forAll (Stream.fill(1000)((shortString, shortString))) { case (a: String, b: String) =>
-      val grid = NeedlemanWunsch.Grid(a, b)
-      val nwScore = grid.scoreLastLine().last
-      val hirschbergAlignment = Hirschberg.align(a, b)
+  private def compareHirshWithNW(a: String, b: String) = {
+    val grid = NeedlemanWunsch.Grid(a, b)
+    val nwScore = grid.scoreLastLine().last
+    val hirschbergAlignment = Hirschberg.align(a, b)
 
-      if (hirschbergAlignment.cost != nwScore) {
-        println("\nNeedlemanWunsch")
-        grid.align.diagram(_.toString)
+    if (hirschbergAlignment.cost != nwScore) {
+      println("\nNeedlemanWunsch")
+      grid.align.diagram(_.toString)
 
-        println("\nHirschberg")
-        hirschbergAlignment.diagram(_.toString)
-      }
-      hirschbergAlignment.cost shouldBe nwScore
+      println("\nHirschberg")
+      hirschbergAlignment.diagram(_.toString)
     }
+    hirschbergAlignment.cost shouldBe nwScore
   }
 }

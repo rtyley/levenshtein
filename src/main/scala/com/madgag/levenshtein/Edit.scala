@@ -52,7 +52,10 @@ object Edit {
       def pad(s: Seq[String]): String = s.map(_.padTo(requiredColWidth,' ')).mkString
 
       println(pad(edits.map(_.srcOpt.getOrElse('-').toString)))
-      val operationIndicators = edits.map { case s: Substitute[_] if s.isAltering => "↓" case _ => "" }
+      val operationIndicators = edits.map {
+        case s: Substitute[_] => if (s.isAltering) "↓" else "⋮"
+        case _ => ""
+      }
       if (operationIndicators.exists(_.nonEmpty)) {
         println(pad(operationIndicators ))
       }
