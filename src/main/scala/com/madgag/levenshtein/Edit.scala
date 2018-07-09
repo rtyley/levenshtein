@@ -53,7 +53,7 @@ object Edit {
 
       println(pad(edits.map(_.srcOpt.getOrElse('-').toString)))
       val operationIndicators = edits.map {
-        case s: Substitute[_] => if (s.isAltering) "↓" else "⋮"
+        case s: Substitute[_] => if (s.isAltering) "↓" else "¦"
         case _ => ""
       }
       if (operationIndicators.exists(_.nonEmpty)) {
